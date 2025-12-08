@@ -4,7 +4,9 @@ import com.graduation.picture.common.BaseResponse;
 import com.graduation.picture.common.ResultUtils;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
+import com.graduation.picture.model.dto.UserLoginDTO;
 import com.graduation.picture.model.dto.UserRegisterDTO;
+import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *@Classname UserController
@@ -37,5 +40,18 @@ public class UserController {
         long result = userService.userRegister(account, password, checkPassword);
         return ResultUtils.success(result);
     }
+
+    /**
+     * 用户登录
+     */
+    @PostMapping("/login")
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginDTO userLoginRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(userLoginRequest == null, ErrorCode.PARAMS_ERROR);
+        String account = userLoginRequest.getUserAccount();
+        String password = userLoginRequest.getUserPassword();
+        LoginUserVO loginUserVO = userService.userLogin(account, password, request);
+        return ResultUtils.success(loginUserVO);
+    }
+
 
 }

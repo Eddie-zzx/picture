@@ -2,6 +2,9 @@ package com.graduation.picture.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.graduation.picture.model.entity.User;
+import com.graduation.picture.model.vo.LoginUserVO;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Classname UserService
@@ -25,4 +28,21 @@ public interface UserService extends IService<User> {
      * @return
      */
     String getEncryptPassword(String password);
+
+    /**
+     * 用户登录
+     * @param account 用户账号
+     * @param password 用户密码
+     * @param request
+     * @return
+     */
+    LoginUserVO userLogin(String account, String password, HttpServletRequest request);
+
+    /**
+     * 获得脱敏后的登录用户信息
+     *
+     * @param user
+     * @return LoginUserVO
+     */
+    LoginUserVO getLoginUserVO(User user);
 }
