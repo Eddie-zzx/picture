@@ -3,17 +3,21 @@ package com.graduation.picture.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.graduation.picture.annotation.AuthCheck;
 import com.graduation.picture.common.BaseResponse;
+import com.graduation.picture.common.DeleteRequest;
 import com.graduation.picture.common.ResultUtils;
 import com.graduation.picture.constant.UserConstant;
+import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.dto.UserLoginDTO;
 import com.graduation.picture.model.dto.UserRegisterDTO;
+import com.graduation.picture.model.dto.UserUpdateDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.model.vo.UserVO;
 import com.graduation.picture.service.UserService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -110,6 +114,35 @@ public class UserController {
         BaseResponse<User> response = getUserById(id);
         User user = response.getData();
         return ResultUtils.success(userService.getUserVO(user));
+    }
+
+    /**
+     * 删除用户
+     */
+    @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean b = userService.removeById(deleteRequest.getId());
+        return ResultUtils.success(b);
+    }
+
+    /**
+     * 更新用户信息
+     */
+    @PostMapping("/update")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        if (userUpdateDTO == null || userUpdateDTO.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(userUpdateDTO, user);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
     }
 
 }
