@@ -1,12 +1,15 @@
 package com.graduation.picture.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
+import com.graduation.picture.model.qo.UserQueryQo;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @Classname UserService
@@ -75,4 +78,19 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVO getUserVO(User user);
+
+    /**
+     * 获取查询条件
+     * @param userQueryQo
+     * @return
+     */
+    QueryWrapper<User> getQueryWrapper(UserQueryQo userQueryQo);
+
+    /**
+     * 获得脱敏后的用户信息列表
+     *
+     * @param userList
+     * @return 脱敏后的用户列表
+     */
+    List<UserVO> getUserVOList(List<User> userList);
 }

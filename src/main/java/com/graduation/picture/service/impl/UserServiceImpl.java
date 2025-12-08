@@ -1,6 +1,8 @@
 package com.graduation.picture.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +14,7 @@ import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.mapper.UserMapper;
 import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
+import com.graduation.picture.model.qo.UserQueryQo;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.model.vo.UserVO;
 import com.graduation.picture.service.UserService;
@@ -20,6 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Classname UserServiceImpl
@@ -178,6 +184,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserVO userVO = new UserVO();
         BeanUtil.copyProperties(user, userVO);
         return userVO;
+    }
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryQo userQueryQo) {
+        if (userQueryQo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryQo.getId();
+        String userName = userQueryQo.getUserName();
+        String userAccount = userQueryQo.getUserAccount();
+        String userProfile = userQueryQo.getUserProfile();
+        String userRole = userQueryQo.getUserRole();
+        String sortField = userQueryQo.getSortField();
+        String sortOrder = userQueryQo.getSortOrder();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjUtil.isNotNull(id), "id", id);
+        queryWrapper.eq(StrUtil.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.like(StrUtil.isNotBlank(userAccount), "userAccount", userAccount);
+        queryWrapper.like(StrUtil.isNotBlank(userName), "userName", userName);
+        queryWrapper.like(StrUtil.isNotBlank(userProfile), "userProfile", userProfile);
+        queryWrapper.orderBy(StrUtil.isNotEmpty(sortField), sortOrder.equals("ascend"), sortField);
+        return queryWrapper;
+    }
+
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream()
+                .map(this::getUserVO)
+                .collect(Collectors.toList());
     }
 
 
