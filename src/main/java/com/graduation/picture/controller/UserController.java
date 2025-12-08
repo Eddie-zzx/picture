@@ -1,9 +1,13 @@
 package com.graduation.picture.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.graduation.picture.annotation.AuthCheck;
 import com.graduation.picture.common.BaseResponse;
 import com.graduation.picture.common.ResultUtils;
+import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
+import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.dto.UserLoginDTO;
 import com.graduation.picture.model.dto.UserRegisterDTO;
 import com.graduation.picture.model.entity.User;
@@ -47,10 +51,10 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginDTO userLoginRequest, HttpServletRequest request) {
-        ThrowUtils.throwIf(userLoginRequest == null, ErrorCode.PARAMS_ERROR);
-        String account = userLoginRequest.getUserAccount();
-        String password = userLoginRequest.getUserPassword();
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        ThrowUtils.throwIf(userLoginDTO == null, ErrorCode.PARAMS_ERROR);
+        String account = userLoginDTO.getUserAccount();
+        String password = userLoginDTO.getUserPassword();
         LoginUserVO loginUserVO = userService.userLogin(account, password, request);
         return ResultUtils.success(loginUserVO);
     }
@@ -73,5 +77,17 @@ public class UserController {
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
     }
+
+    /**
+     * 创建用户
+     */
+    @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Long> addUser(@RequestBody UserAddDTO userAddDTO) {
+        ThrowUtils.throwIf(userAddDTO == null, ErrorCode.PARAMS_ERROR);
+        long userId = userService.addUser(userAddDTO);
+        return ResultUtils.success(userId);
+    }
+
 
 }

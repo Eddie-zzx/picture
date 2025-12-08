@@ -1,6 +1,7 @@
 package com.graduation.picture.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
 
@@ -59,4 +60,11 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean userLogout(HttpServletRequest request);
+
+    /**
+     * 创建用户
+     * @param userAddDTO 用户信息
+     * @return
+     */
+    long addUser(UserAddDTO userAddDTO);
 }

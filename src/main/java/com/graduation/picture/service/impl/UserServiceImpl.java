@@ -8,7 +8,9 @@ import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.enums.UserRoleEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
+import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.mapper.UserMapper;
+import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.service.UserService;
@@ -151,6 +153,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 移除登录态
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
+    }
+
+    @Override
+    public long addUser(UserAddDTO userAddDTO) {
+        User user = new User();
+        BeanUtil.copyProperties(userAddDTO, user);
+        // 默认密码
+        final String DEFAULT_PASSWORD = UserConstant.DEFAULT_PASSWORD;
+        String encryptPassword = this.getEncryptPassword(DEFAULT_PASSWORD);
+        user.setUserPassword(encryptPassword);
+        // 插入数据库
+        boolean result = this.save(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return user.getId();
     }
 
 
