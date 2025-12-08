@@ -11,6 +11,10 @@ spring:
     url: jdbc:mysql://localhost:3306/picture
     username: root
     password: 123456
+  # 开放文件上传体积
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
 mybatis-plus:
   configuration:
@@ -27,3 +31,12 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.graduation.picture.controller
+
+# 对象存储配置（需要从腾讯云获取）
+cos:
+  client:
+    host:
+    secretId:
+    secretKey:
+    region: ap-guangzhou
+    bucket: picture-1317608563
