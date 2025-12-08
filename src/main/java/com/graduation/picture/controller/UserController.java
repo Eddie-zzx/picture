@@ -6,8 +6,10 @@ import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.model.dto.UserLoginDTO;
 import com.graduation.picture.model.dto.UserRegisterDTO;
+import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.service.UserService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,5 +55,13 @@ public class UserController {
         return ResultUtils.success(loginUserVO);
     }
 
+    /**
+     * 获取当前登录用户
+     */
+    @GetMapping("/get/login")
+    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        return ResultUtils.success(userService.getLoginUserVO(loginUser));
+    }
 
 }
