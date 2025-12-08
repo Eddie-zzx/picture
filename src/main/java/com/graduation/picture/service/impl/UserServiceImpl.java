@@ -13,6 +13,7 @@ import com.graduation.picture.mapper.UserMapper;
 import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
+import com.graduation.picture.model.vo.UserVO;
 import com.graduation.picture.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -167,6 +168,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean result = this.save(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return user.getId();
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtil.copyProperties(user, userVO);
+        return userVO;
     }
 
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.graduation.picture.model.dto.UserAddDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.LoginUserVO;
+import com.graduation.picture.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -67,4 +68,11 @@ public interface UserService extends IService<User> {
      * @return
      */
     long addUser(UserAddDTO userAddDTO);
+
+    /**
+     * 获得脱敏后的用户信息
+     * @param user
+     * @return
+     */
+    UserVO getUserVO(User user);
 }
