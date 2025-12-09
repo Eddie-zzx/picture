@@ -3,7 +3,9 @@ package com.graduation.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.graduation.picture.model.dto.UserAddDTO;
+import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.User;
+import com.graduation.picture.model.qo.PictureQueryQo;
 import com.graduation.picture.model.qo.UserQueryQo;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.model.vo.UserVO;
@@ -93,4 +95,13 @@ public interface UserService extends IService<User> {
      * @return 脱敏后的用户列表
      */
     List<UserVO> getUserVOList(List<User> userList);
+
+    /**
+     * 是否为管理员
+     *
+     * @param user
+     * @return
+     */
+    boolean isAdmin(User user);
+
 }
