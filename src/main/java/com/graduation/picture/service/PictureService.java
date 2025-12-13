@@ -3,6 +3,7 @@ package com.graduation.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.graduation.picture.model.dto.PictureReviewDTO;
 import com.graduation.picture.model.dto.PictureUploadDTO;
 import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.User;
@@ -63,4 +64,20 @@ public interface PictureService extends IService<Picture> {
      * @param picture
      */
     void validPicture(Picture picture);
+
+    /**
+     * 图片审核
+     *
+     * @param pictureReviewDTO
+     * @param loginUser
+     */
+    void doPictureReview(PictureReviewDTO pictureReviewDTO, User loginUser);
+
+    /**
+     * 填充审核参数
+     * @param picture
+     * @param loginUser
+     */
+    void fillReviewParams(Picture picture, User loginUser);
+
 }
