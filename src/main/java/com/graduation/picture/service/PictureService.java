@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.graduation.picture.model.dto.PictureReviewDTO;
+import com.graduation.picture.model.dto.PictureUploadByBatchDTO;
 import com.graduation.picture.model.dto.PictureUploadDTO;
 import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.User;
@@ -23,12 +24,12 @@ public interface PictureService extends IService<Picture> {
     /**
      * 上传图片
      *
-     * @param multipartFile
+     * @param inputSource
      * @param pictureUploadDTO
      * @param loginUser
      * @return
      */
-    PictureVO uploadPicture(MultipartFile multipartFile,
+    PictureVO uploadPicture(Object inputSource,
                             PictureUploadDTO pictureUploadDTO,
                             User loginUser);
 
@@ -79,5 +80,23 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser
      */
     void fillReviewParams(Picture picture, User loginUser);
+
+    /**
+     * 批量抓取和创建图片
+     *
+     * @param pictureUploadByBatchDTO
+     * @param loginUser
+     * @return 成功创建的图片数
+     */
+    Integer uploadPictureByBatch(
+            PictureUploadByBatchDTO pictureUploadByBatchDTO,
+            User loginUser
+    );
+
+    /**
+     * 清理图片
+     * @param oldPicture
+     */
+    void clearPictureFile(Picture oldPicture);
 
 }
