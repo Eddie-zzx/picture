@@ -11,6 +11,7 @@ import com.graduation.picture.common.DeleteRequest;
 import com.graduation.picture.common.ResultUtils;
 import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.enums.PictureReviewStatusEnum;
+import com.graduation.picture.enums.SpaceLevelEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
@@ -20,11 +21,14 @@ import com.graduation.picture.model.dto.PictureUpdateDTO;
 import com.graduation.picture.model.dto.PictureUploadByBatchDTO;
 import com.graduation.picture.model.dto.PictureUploadDTO;
 import com.graduation.picture.model.entity.Picture;
+import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.qo.PictureQueryQo;
 import com.graduation.picture.model.vo.PictureTagCategoryVO;
 import com.graduation.picture.model.vo.PictureVO;
+import com.graduation.picture.model.vo.SpaceLevelVO;
 import com.graduation.picture.service.PictureService;
+import com.graduation.picture.service.SpaceService;
 import com.graduation.picture.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +49,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Classname PictureController
@@ -62,6 +67,8 @@ public class PictureController {
     private UserService userService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private SpaceService spaceService;
     /**
      * 本地缓存
      */
@@ -110,17 +117,7 @@ public class PictureController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        long id = deleteRequest.getId();
-        // 判断是否存在
-        Picture oldPicture = pictureService.getById(id);
-        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可删除
-        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 操作数据库
-        boolean result = pictureService.removeById(id);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        pictureService.deletePicture(deleteRequest.getId(), loginUser);
         return ResultUtils.success(true);
     }
 
@@ -176,6 +173,12 @@ public class PictureController {
         // 查询数据库
         Picture picture = pictureService.getById(id);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+        // 空间权限校验
+        Long spaceId = picture.getSpaceId();
+        if (spaceId != null) {
+            User loginUser = userService.getLoginUser(request);
+            pictureService.checkPictureAuth(loginUser, picture);
+        }
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVO(picture, request));
     }
@@ -204,8 +207,22 @@ public class PictureController {
         long size = pictureQueryQo.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        // 普通用户只能获取审核通过的图片
-        pictureQueryQo.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+        // 空间权限校验
+        Long spaceId = pictureQueryQo.getSpaceId();
+        if (spaceId == null) {
+            // 公开图库
+            // 普通用户默认只能看到审核通过的数据
+            pictureQueryQo.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+            pictureQueryQo.setNullSpaceId(true);
+        } else {
+            // 私有空间
+            User loginUser = userService.getLoginUser(request);
+            Space space = spaceService.getById(spaceId);
+            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+            if (!loginUser.getId().equals(space.getUserId())) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
+            }
+        }
         // 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
                 pictureService.getQueryWrapper(pictureQueryQo));
@@ -221,29 +238,8 @@ public class PictureController {
         if (pictureEditDTO == null || pictureEditDTO.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 在此处将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureEditDTO, picture);
-        // 将 list 转为 string
-        picture.setTags(JSONUtil.toJsonStr(pictureEditDTO.getTags()));
-        // 设置编辑时间
-        picture.setEditTime(new Date());
-        // 数据校验
-        pictureService.validPicture(picture);
         User loginUser = userService.getLoginUser(request);
-        // 判断是否存在
-        long id = pictureEditDTO.getId();
-        Picture oldPicture = pictureService.getById(id);
-        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可编辑
-        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 补充审核参数
-        pictureService.fillReviewParams(picture, loginUser);
-        // 操作数据库
-        boolean result = pictureService.updateById(picture);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        pictureService.editPicture(pictureEditDTO, loginUser);
         return ResultUtils.success(true);
     }
 
@@ -269,6 +265,7 @@ public class PictureController {
     }
 
     @PostMapping("/list/page/vo/cache")
+    @Deprecated
     public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryQo pictureQueryQo,
                                                                       HttpServletRequest request) {
         long current = pictureQueryQo.getCurrent();
@@ -325,6 +322,18 @@ public class PictureController {
         return ResultUtils.success(uploadCount);
     }
 
+
+    @GetMapping("/list/level")
+    public BaseResponse<List<SpaceLevelVO>> listSpaceLevel() {
+        List<SpaceLevelVO> spaceLevelList = Arrays.stream(SpaceLevelEnum.values()) // 获取所有枚举
+                .map(spaceLevelEnum -> new SpaceLevelVO(
+                        spaceLevelEnum.getValue(),
+                        spaceLevelEnum.getText(),
+                        spaceLevelEnum.getMaxCount(),
+                        spaceLevelEnum.getMaxSize()))
+                .collect(Collectors.toList());
+        return ResultUtils.success(spaceLevelList);
+    }
 
 
 }
