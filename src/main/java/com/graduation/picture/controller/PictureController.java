@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.graduation.picture.annotation.AuthCheck;
+import com.graduation.picture.api.imagesearch.ImageSearchApiFacade;
 import com.graduation.picture.common.BaseResponse;
 import com.graduation.picture.common.DeleteRequest;
 import com.graduation.picture.common.ResultUtils;
@@ -14,11 +15,14 @@ import com.graduation.picture.enums.PictureReviewStatusEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
+import com.graduation.picture.model.api.ImageSearchVO;
+import com.graduation.picture.model.api.SearchPictureByPictureDTO;
 import com.graduation.picture.model.dto.PictureEditDTO;
 import com.graduation.picture.model.dto.PictureReviewDTO;
 import com.graduation.picture.model.dto.PictureUpdateDTO;
 import com.graduation.picture.model.dto.PictureUploadByBatchDTO;
 import com.graduation.picture.model.dto.PictureUploadDTO;
+import com.graduation.picture.model.dto.SearchPictureByColorDTO;
 import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
@@ -317,6 +321,29 @@ public class PictureController {
         return ResultUtils.success(uploadCount);
     }
 
+    /**
+     * 以图搜图
+     */
+    @PostMapping("/search/picture")
+    public BaseResponse<List<ImageSearchVO>> searchPictureByPicture(@RequestBody SearchPictureByPictureDTO searchPictureByPictureDTO) {
+        ThrowUtils.throwIf(searchPictureByPictureDTO == null, ErrorCode.PARAMS_ERROR);
+        Long pictureId = searchPictureByPictureDTO.getPictureId();
+        ThrowUtils.throwIf(pictureId == null || pictureId <= 0, ErrorCode.PARAMS_ERROR);
+        Picture picture = pictureService.getById(pictureId);
+        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+        List<ImageSearchVO> resultList = ImageSearchApiFacade.searchImage(picture.getUrl());
+        return ResultUtils.success(resultList);
+    }
+
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorDTO searchPictureByColorDTO, HttpServletRequest request) {
+        ThrowUtils.throwIf(searchPictureByColorDTO == null, ErrorCode.PARAMS_ERROR);
+        String picColor = searchPictureByColorDTO.getPicColor();
+        Long spaceId = searchPictureByColorDTO.getSpaceId();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> result = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
+        return ResultUtils.success(result);
+    }
 
 
 

@@ -14,6 +14,7 @@ import com.graduation.picture.model.vo.PictureVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @Classname PictureService
@@ -121,4 +122,12 @@ public interface PictureService extends IService<Picture> {
      */
     void editPicture(PictureEditDTO pictureEditDTO, User loginUser);
 
+    /**
+     * 根据颜色搜索图片
+     * @param spaceId
+     * @param picColor
+     * @param loginUser
+     * @return
+     */
+    List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser);
 }
