@@ -11,7 +11,6 @@ import com.graduation.picture.common.DeleteRequest;
 import com.graduation.picture.common.ResultUtils;
 import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.enums.PictureReviewStatusEnum;
-import com.graduation.picture.enums.SpaceLevelEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
@@ -26,11 +25,9 @@ import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.qo.PictureQueryQo;
 import com.graduation.picture.model.vo.PictureTagCategoryVO;
 import com.graduation.picture.model.vo.PictureVO;
-import com.graduation.picture.model.vo.SpaceLevelVO;
 import com.graduation.picture.service.PictureService;
 import com.graduation.picture.service.SpaceService;
 import com.graduation.picture.service.UserService;
-import io.swagger.annotations.Api;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -46,10 +43,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @Classname PictureController
@@ -323,17 +318,6 @@ public class PictureController {
     }
 
 
-    @GetMapping("/list/level")
-    public BaseResponse<List<SpaceLevelVO>> listSpaceLevel() {
-        List<SpaceLevelVO> spaceLevelList = Arrays.stream(SpaceLevelEnum.values()) // 获取所有枚举
-                .map(spaceLevelEnum -> new SpaceLevelVO(
-                        spaceLevelEnum.getValue(),
-                        spaceLevelEnum.getText(),
-                        spaceLevelEnum.getMaxCount(),
-                        spaceLevelEnum.getMaxSize()))
-                .collect(Collectors.toList());
-        return ResultUtils.success(spaceLevelList);
-    }
 
 
 }
