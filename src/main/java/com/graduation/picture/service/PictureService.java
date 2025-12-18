@@ -3,6 +3,7 @@ package com.graduation.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.graduation.picture.model.dto.PictureEditByBatchDTO;
 import com.graduation.picture.model.dto.PictureEditDTO;
 import com.graduation.picture.model.dto.PictureReviewDTO;
 import com.graduation.picture.model.dto.PictureUploadByBatchDTO;
@@ -130,4 +131,11 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser);
+
+    /**
+     * 批量编辑图片
+     * @param pictureEditByBatchDTO
+     * @param loginUser
+     */
+    void editPictureByBatch(PictureEditByBatchDTO pictureEditByBatchDTO, User loginUser);
 }

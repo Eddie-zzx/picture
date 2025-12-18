@@ -17,6 +17,7 @@ import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.model.api.ImageSearchVO;
 import com.graduation.picture.model.api.SearchPictureByPictureDTO;
+import com.graduation.picture.model.dto.PictureEditByBatchDTO;
 import com.graduation.picture.model.dto.PictureEditDTO;
 import com.graduation.picture.model.dto.PictureReviewDTO;
 import com.graduation.picture.model.dto.PictureUpdateDTO;
@@ -345,6 +346,13 @@ public class PictureController {
         return ResultUtils.success(result);
     }
 
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchDTO pictureEditByBatchDTO, HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureEditByBatchDTO == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.editPictureByBatch(pictureEditByBatchDTO, loginUser);
+        return ResultUtils.success(true);
+    }
 
 
 }
