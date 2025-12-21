@@ -1,5 +1,6 @@
 package com.graduation.picture.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
@@ -7,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.graduation.picture.api.aliyunai.AliYunAiApi;
 import com.graduation.picture.enums.PictureReviewStatusEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
@@ -18,6 +20,9 @@ import com.graduation.picture.manager.upload.PictureUploadTemplate;
 import com.graduation.picture.manager.upload.UrlPictureUpload;
 import com.graduation.picture.mapper.PictureMapper;
 import com.graduation.picture.mapper.UserMapper;
+import com.graduation.picture.model.api.CreateOutPaintingTaskDTO;
+import com.graduation.picture.model.api.CreateOutPaintingTaskResponse;
+import com.graduation.picture.model.api.CreatePictureOutPaintingTaskDTO;
 import com.graduation.picture.model.dto.PictureEditByBatchDTO;
 import com.graduation.picture.model.dto.PictureEditDTO;
 import com.graduation.picture.model.dto.PictureReviewDTO;
@@ -56,6 +61,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,9 +73,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService {
-    @Resource
-    private FileManager fileManager;
-
     @Resource
     private UserService userService;
 
@@ -87,6 +90,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     @Resource
     private TransactionTemplate transactionTemplate;
+
+    @Resource
+    private AliYunAiApi aliYunAiApi;
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadDTO pictureUploadDTO, User loginUser) {
         // 校验参数
@@ -620,6 +626,25 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             log.error("名称解析错误", e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "名称解析错误");
         }
+    }
+
+
+    @Override
+    public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskDTO createPictureOutPaintingTaskDTO, User loginUser) {
+        // 获取图片信息
+        Long pictureId = createPictureOutPaintingTaskDTO.getPictureId();
+        Picture picture = Optional.ofNullable(this.getById(pictureId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+        // 权限校验
+        checkPictureAuth(loginUser, picture);
+        // 构造请求参数
+        CreateOutPaintingTaskDTO taskRequest = new CreateOutPaintingTaskDTO();
+        CreateOutPaintingTaskDTO.Input input = new CreateOutPaintingTaskDTO.Input();
+        input.setImageUrl(picture.getUrl());
+        taskRequest.setInput(input);
+        BeanUtil.copyProperties(createPictureOutPaintingTaskDTO, taskRequest);
+        // 创建任务
+        return aliYunAiApi.createOutPaintingTask(taskRequest);
     }
 
 

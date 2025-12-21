@@ -3,6 +3,8 @@ package com.graduation.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.graduation.picture.model.api.CreateOutPaintingTaskResponse;
+import com.graduation.picture.model.api.CreatePictureOutPaintingTaskDTO;
 import com.graduation.picture.model.dto.PictureEditByBatchDTO;
 import com.graduation.picture.model.dto.PictureEditDTO;
 import com.graduation.picture.model.dto.PictureReviewDTO;
@@ -138,4 +140,16 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser
      */
     void editPictureByBatch(PictureEditByBatchDTO pictureEditByBatchDTO, User loginUser);
+
+
+    /**
+     * 创建图片外绘任务
+     * @param createPictureOutPaintingTaskDTO
+     * @param loginUser
+     * @return
+     */
+    CreateOutPaintingTaskResponse createPictureOutPaintingTask(
+            CreatePictureOutPaintingTaskDTO createPictureOutPaintingTaskDTO,
+            User loginUser
+    );
 }
