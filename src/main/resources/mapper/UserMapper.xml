@@ -28,4 +28,7 @@
         updateTime,isDelete,vipExpireTime,
         vipCode,vipNumber
     </sql>
+    <select id="getUserIdByUserAccount" resultType="java.lang.Long">
+        SELECT id FROM user WHERE userAccount = #{userAccount}
+    </select>
 </mapper>

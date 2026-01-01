@@ -1,12 +1,12 @@
 package com.graduation.picture.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.graduation.picture.model.dto.SpaceCategoryAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceRankAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceSizeAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceTagAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceUsageAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceUserAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceCategoryAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceRankAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceSizeAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceTagAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceUsageAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceUserAnalyzeDTO;
 import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.vo.SpaceCategoryAnalyzeVO;
@@ -17,10 +17,7 @@ import com.graduation.picture.model.vo.SpaceUserAnalyzeVO;
 
 import java.util.List;
 
-/**
- * @author 李鱼皮
- * @createDate 2024-12-18 19:53:34
- */
+
 public interface SpaceAnalyzeService extends IService<Space> {
 
     /**

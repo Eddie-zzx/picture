@@ -3,7 +3,7 @@ package com.graduation.picture.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.graduation.picture.model.dto.SpaceAddDTO;
+import com.graduation.picture.model.dto.space.SpaceAddDTO;
 import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.qo.SpaceQueryQo;
@@ -72,4 +72,13 @@ public interface SpaceService extends IService<Space> {
      * @param space
      */
     void checkSpaceAuth(User loginUser, Space space);
+
+    /**
+     * 判断空间创建者
+     *
+     * @param spaceId
+     * @param userId
+     * @return
+     */
+    boolean isSpaceCreator(Long spaceId, Long userId);
 }

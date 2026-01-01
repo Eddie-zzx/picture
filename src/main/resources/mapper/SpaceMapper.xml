@@ -26,4 +26,12 @@
         totalCount,userId,createTime,
         editTime,updateTime,isDelete
     </sql>
+    <select id="isSpaceCreator" resultType="java.lang.Boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM space
+            WHERE id = #{spaceId}
+            AND userId = #{userId}
+        )
+    </select>
 </mapper>

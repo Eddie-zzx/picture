@@ -14,20 +14,18 @@ import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.manager.CosManager;
-import com.graduation.picture.manager.FileManager;
 import com.graduation.picture.manager.upload.FilePictureUpload;
 import com.graduation.picture.manager.upload.PictureUploadTemplate;
 import com.graduation.picture.manager.upload.UrlPictureUpload;
 import com.graduation.picture.mapper.PictureMapper;
-import com.graduation.picture.mapper.UserMapper;
 import com.graduation.picture.model.api.CreateOutPaintingTaskDTO;
 import com.graduation.picture.model.api.CreateOutPaintingTaskResponse;
 import com.graduation.picture.model.api.CreatePictureOutPaintingTaskDTO;
-import com.graduation.picture.model.dto.PictureEditByBatchDTO;
-import com.graduation.picture.model.dto.PictureEditDTO;
-import com.graduation.picture.model.dto.PictureReviewDTO;
-import com.graduation.picture.model.dto.PictureUploadByBatchDTO;
-import com.graduation.picture.model.dto.PictureUploadDTO;
+import com.graduation.picture.model.dto.picture.PictureEditByBatchDTO;
+import com.graduation.picture.model.dto.picture.PictureEditDTO;
+import com.graduation.picture.model.dto.picture.PictureReviewDTO;
+import com.graduation.picture.model.dto.picture.PictureUploadByBatchDTO;
+import com.graduation.picture.model.dto.picture.PictureUploadDTO;
 import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
@@ -45,12 +43,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -102,10 +98,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         if (spaceId != null) {
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
-            // 必须空间创建人（管理员）才能上传
-            if (!loginUser.getId().equals(space.getUserId())) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
-            }
+            // 改为使用统一的权限校验
+//            // 校验是否有空间的权限，仅空间管理员才能上传
+//            if (!loginUser.getId().equals(space.getUserId())) {
+//                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间权限");
+//            }
             // 校验额度
             if (space.getTotalCount() >= space.getMaxCount()) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "空间条数不足");
@@ -124,10 +121,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         if (pictureId != null) {
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
-            // 仅本人或管理员可编辑
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
+            // 改为使用统一的权限校验
+//            // 仅本人或管理员可编辑图片
+//            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+//                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+//            }
             // 校验空间是否一致
             // 没传 spaceId，则复用原有图片的 spaceId
             if (spaceId == null) {
@@ -467,8 +465,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 判断是否存在
         Picture oldPicture = this.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 校验权限
-        checkPictureAuth(loginUser, oldPicture);
+        // 校验权限，已经改为使用注解鉴权
+//        checkPictureAuth(loginUser, oldPicture);
         // 开启事务
         transactionTemplate.execute(status -> {
             // 操作数据库
@@ -505,8 +503,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         long id = pictureEditDTO.getId();
         Picture oldPicture = this.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 校验权限
-        checkPictureAuth(loginUser, oldPicture);
+//        // 校验权限，改为注解权限
+//        checkPictureAuth(loginUser, oldPicture);
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
@@ -635,8 +633,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Long pictureId = createPictureOutPaintingTaskDTO.getPictureId();
         Picture picture = Optional.ofNullable(this.getById(pictureId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
-        // 权限校验
-        checkPictureAuth(loginUser, picture);
+//        // 权限校验，改为注解权限
+//        checkPictureAuth(loginUser, picture);
         // 构造请求参数
         CreateOutPaintingTaskDTO taskRequest = new CreateOutPaintingTaskDTO();
         CreateOutPaintingTaskDTO.Input input = new CreateOutPaintingTaskDTO.Input();

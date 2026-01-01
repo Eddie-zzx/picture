@@ -2,7 +2,6 @@ package com.graduation.picture.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,13 +9,13 @@ import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
 import com.graduation.picture.mapper.SpaceMapper;
-import com.graduation.picture.model.dto.SpaceAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceCategoryAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceRankAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceSizeAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceTagAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceUsageAnalyzeDTO;
-import com.graduation.picture.model.dto.SpaceUserAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceCategoryAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceRankAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceSizeAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceTagAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceUsageAnalyzeDTO;
+import com.graduation.picture.model.dto.space.analyze.SpaceUserAnalyzeDTO;
 import com.graduation.picture.model.entity.Picture;
 import com.graduation.picture.model.entity.Space;
 import com.graduation.picture.model.entity.User;
@@ -32,17 +31,12 @@ import com.graduation.picture.service.UserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-/**
- * @author 李鱼皮
- * @createDate 2024-12-18 19:53:34
- */
+
 @Service
 public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> implements SpaceAnalyzeService {
 

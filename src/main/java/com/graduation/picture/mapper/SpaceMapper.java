@@ -3,6 +3,7 @@ package com.graduation.picture.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.graduation.picture.model.entity.Space;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Classname SpaceMapper
@@ -11,4 +12,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface SpaceMapper extends BaseMapper<Space> {
+
+    boolean isSpaceCreator(@Param("spaceId") Long spaceId, @Param("userId") Long userId);
 }

@@ -1,6 +1,5 @@
 package com.graduation.picture.controller;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.graduation.picture.annotation.AuthCheck;
 import com.graduation.picture.common.BaseResponse;
@@ -10,16 +9,15 @@ import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
-import com.graduation.picture.model.dto.UserAddDTO;
-import com.graduation.picture.model.dto.UserLoginDTO;
-import com.graduation.picture.model.dto.UserRegisterDTO;
-import com.graduation.picture.model.dto.UserUpdateDTO;
+import com.graduation.picture.model.dto.user.UserAddDTO;
+import com.graduation.picture.model.dto.user.UserLoginDTO;
+import com.graduation.picture.model.dto.user.UserRegisterDTO;
+import com.graduation.picture.model.dto.user.UserUpdateDTO;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.qo.UserQueryQo;
 import com.graduation.picture.model.vo.LoginUserVO;
 import com.graduation.picture.model.vo.UserVO;
 import com.graduation.picture.service.UserService;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
