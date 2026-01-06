@@ -1,5 +1,6 @@
 package com.graduation.picture.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.graduation.picture.annotation.AuthCheck;
 import com.graduation.picture.common.BaseResponse;
@@ -7,6 +8,7 @@ import com.graduation.picture.common.DeleteRequest;
 import com.graduation.picture.common.ResultUtils;
 import com.graduation.picture.constant.UserConstant;
 import com.graduation.picture.enums.SpaceLevelEnum;
+import com.graduation.picture.enums.SpaceTypeEnum;
 import com.graduation.picture.exception.BusinessException;
 import com.graduation.picture.exception.ErrorCode;
 import com.graduation.picture.exception.ThrowUtils;
@@ -15,13 +17,16 @@ import com.graduation.picture.model.dto.space.SpaceAddDTO;
 import com.graduation.picture.model.dto.space.SpaceEditDTO;
 import com.graduation.picture.model.dto.space.SpaceUpdateDTO;
 import com.graduation.picture.model.entity.Space;
+import com.graduation.picture.model.entity.SpaceUser;
 import com.graduation.picture.model.entity.User;
 import com.graduation.picture.model.qo.SpaceQueryQo;
 import com.graduation.picture.model.vo.SpaceLevelVO;
 import com.graduation.picture.model.vo.SpaceVO;
 import com.graduation.picture.service.SpaceService;
+import com.graduation.picture.service.SpaceUserService;
 import com.graduation.picture.service.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +58,9 @@ public class SpaceController {
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
 
+    @Resource
+    private SpaceUserService spaceUserService;
+
     @PostMapping("/add")
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddDTO spaceAddDTO, HttpServletRequest request) {
         ThrowUtils.throwIf(spaceAddDTO == null, ErrorCode.PARAMS_ERROR);
@@ -62,6 +70,7 @@ public class SpaceController {
     }
 
     @PostMapping("/delete")
+    @Transactional
     public BaseResponse<Boolean> deleteSpace(@RequestBody DeleteRequest deleteRequest
             , HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
@@ -76,6 +85,10 @@ public class SpaceController {
         spaceService.checkSpaceAuth(loginUser, oldSpace);
         // 操作数据库
         boolean result = spaceService.removeById(id);
+        // 删除团队空间表中相关数据
+        if (oldSpace.getSpaceType() == SpaceTypeEnum.TEAM.getValue()) {
+            spaceUserService.remove(new LambdaQueryWrapper<SpaceUser>().eq(SpaceUser::getSpaceId, oldSpace.getId()));
+        }
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
