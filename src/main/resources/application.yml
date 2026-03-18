@@ -21,7 +21,7 @@ spring:
   # 空间图片分表
   shardingsphere:
     datasource:
-      names: yu_picture
+      names: picture
       yu_picture:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver

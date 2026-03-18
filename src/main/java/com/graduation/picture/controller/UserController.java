@@ -1,5 +1,7 @@
 package com.graduation.picture.controller;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.graduation.picture.annotation.AuthCheck;
 import com.graduation.picture.common.BaseResponse;
@@ -148,12 +150,16 @@ public class UserController {
     @ApiOperation(value = "更新用户信息")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
-        if (userUpdateDTO == null || userUpdateDTO.getId() == null) {
+        if (userUpdateDTO == null || userUpdateDTO.getUserAccount() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = new User();
-        BeanUtils.copyProperties(userUpdateDTO, user);
-        boolean result = userService.updateById(user);
+        // 方式1：通过 UpdateWrapper 直接 set 需要更新的字段
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getUserAccount, userUpdateDTO.getUserAccount()) // 条件：根据 账号 更新
+                .set(User::getUserName, userUpdateDTO.getUserName())
+                .set(User::getUserProfile, userUpdateDTO.getUserProfile());
+
+        boolean result = userService.update(updateWrapper);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
