@@ -97,12 +97,15 @@ public class UserController {
      * 创建用户
      */
     @PostMapping("/add")
-    @ApiOperation(value = "创建用户")
+    @ApiOperation(value = "新增用户")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addUser(@RequestBody UserAddDTO userAddDTO) {
         ThrowUtils.throwIf(userAddDTO == null, ErrorCode.PARAMS_ERROR);
-        long userId = userService.addUser(userAddDTO);
-        return ResultUtils.success(userId);
+        String account = userAddDTO.getUserAccount();
+        String password = userAddDTO.getUserPassword();
+        String checkPassword = userAddDTO.getCheckPassword();
+        long result = userService.userRegister(account, password, checkPassword);
+        return ResultUtils.success(result);
     }
 
     /**

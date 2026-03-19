@@ -11,29 +11,20 @@ import java.io.Serializable;
 public class UserAddDTO implements Serializable {
 
     /**
-     * 用户昵称
-     */
-    private String userName;
-
-    /**
      * 账号
      */
     private String userAccount;
 
     /**
-     * 用户头像
+     * 密码
      */
-    private String userAvatar;
+    private String userPassword;
 
     /**
-     * 用户简介
+     * 确认密码
      */
-    private String userProfile;
+    private String checkPassword;
 
-    /**
-     * 用户角色: user, admin
-     */
-    private String userRole;
 
     private static final long serialVersionUID = 1L;
 }
