@@ -140,45 +140,45 @@ public class PictureController {
     /**
      * 更新图片（仅管理员可用）
      */
-    @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateDTO pictureUpdateDTO, HttpServletRequest request) {
-        if (pictureUpdateDTO == null || pictureUpdateDTO.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // 将实体类和 DTO 进行转换
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureUpdateDTO, picture);
-        // 将 list 转为 string
-        picture.setTags(JSONUtil.toJsonStr(pictureUpdateDTO.getTags()));
-        // 数据校验
-        pictureService.validPicture(picture);
-        // 判断是否存在
-        long id = pictureUpdateDTO.getId();
-        Picture oldPicture = pictureService.getById(id);
-        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 补充审核参数
-        User loginUser = userService.getLoginUser(request);
-        pictureService.fillReviewParams(picture, loginUser);
-        // 操作数据库
-        boolean result = pictureService.updateById(picture);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        return ResultUtils.success(true);
-    }
+//    @PostMapping("/update")
+//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+//    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateDTO pictureUpdateDTO, HttpServletRequest request) {
+//        if (pictureUpdateDTO == null || pictureUpdateDTO.getId() <= 0) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        // 将实体类和 DTO 进行转换
+//        Picture picture = new Picture();
+//        BeanUtils.copyProperties(pictureUpdateDTO, picture);
+//        // 将 list 转为 string
+//        picture.setTags(JSONUtil.toJsonStr(pictureUpdateDTO.getTags()));
+//        // 数据校验
+//        pictureService.validPicture(picture);
+//        // 判断是否存在
+//        long id = pictureUpdateDTO.getId();
+//        Picture oldPicture = pictureService.getById(id);
+//        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
+//        // 补充审核参数
+//        User loginUser = userService.getLoginUser(request);
+//        pictureService.fillReviewParams(picture, loginUser);
+//        // 操作数据库
+//        boolean result = pictureService.updateById(picture);
+//        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+//        return ResultUtils.success(true);
+//    }
 
-    /**
-     * 根据 id 获取图片（仅管理员可用）
-     */
-    @GetMapping("/get")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Picture> getPictureById(long id, HttpServletRequest request) {
-        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        // 查询数据库
-        Picture picture = pictureService.getById(id);
-        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
-        // 获取封装类
-        return ResultUtils.success(picture);
-    }
+//    /**
+//     * 根据 id 获取图片（仅管理员可用）
+//     */
+//    @GetMapping("/get")
+//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+//    public BaseResponse<Picture> getPictureById(long id, HttpServletRequest request) {
+//        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+//        // 查询数据库
+//        Picture picture = pictureService.getById(id);
+//        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
+//        // 获取封装类
+//        return ResultUtils.success(picture);
+//    }
 
     /**
      * 根据 id 获取图片（封装类）
@@ -295,51 +295,51 @@ public class PictureController {
         return ResultUtils.success(true);
     }
 
-    @PostMapping("/list/page/vo/cache")
-    @Deprecated
-    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryQo pictureQueryQo,
-                                                                      HttpServletRequest request) {
-        long current = pictureQueryQo.getCurrent();
-        long size = pictureQueryQo.getPageSize();
-        // 限制非法请求
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        // 过滤数据，普通用户默认只能看到审核通过的数据
-        pictureQueryQo.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
-        // 查询缓存，缓存中没有，再查询数据库
-        // 构建缓存的 key
-        String queryCondition = JSONUtil.toJsonStr(pictureQueryQo);
-        String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
-        String cacheKey = String.format("picture:listPictureVOByPage:%s", hashKey);
-        // 1. 先从本地缓存中查询
-        String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
-        if (cachedValue != null) {
-            // 如果缓存命中，返回结果
-            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
-            return ResultUtils.success(cachedPage);
-        }
-        // 2. 本地缓存未命中，查询 Redis 分布式缓存
-        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
-        cachedValue = opsForValue.get(cacheKey);
-        if (cachedValue != null) {
-            // 如果缓存命中，更新本地缓存，返回结果
-            LOCAL_CACHE.put(cacheKey, cachedValue);
-            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
-            return ResultUtils.success(cachedPage);
-        }
-        // 3. 查询数据库
-        Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
-                pictureService.getQueryWrapper(pictureQueryQo));
-        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
-        // 4. 更新缓存
-        // 更新 Redis 缓存
-        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
-        // 设置缓存的过期时间，5 - 10 分钟过期，防止缓存雪崩
-        int cacheExpireTime = 300 + RandomUtil.randomInt(0, 300);
-        opsForValue.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
-        // 写入本地缓存
-        LOCAL_CACHE.put(cacheKey, cacheValue);
-        return ResultUtils.success(pictureVOPage);
-    }
+//    @PostMapping("/list/page/vo/cache")
+//    @Deprecated
+//    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryQo pictureQueryQo,
+//                                                                      HttpServletRequest request) {
+//        long current = pictureQueryQo.getCurrent();
+//        long size = pictureQueryQo.getPageSize();
+//        // 限制非法请求
+//        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+//        // 过滤数据，普通用户默认只能看到审核通过的数据
+//        pictureQueryQo.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+//        // 查询缓存，缓存中没有，再查询数据库
+//        // 构建缓存的 key
+//        String queryCondition = JSONUtil.toJsonStr(pictureQueryQo);
+//        String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
+//        String cacheKey = String.format("picture:listPictureVOByPage:%s", hashKey);
+//        // 1. 先从本地缓存中查询
+//        String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
+//        if (cachedValue != null) {
+//            // 如果缓存命中，返回结果
+//            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+//            return ResultUtils.success(cachedPage);
+//        }
+//        // 2. 本地缓存未命中，查询 Redis 分布式缓存
+//        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+//        cachedValue = opsForValue.get(cacheKey);
+//        if (cachedValue != null) {
+//            // 如果缓存命中，更新本地缓存，返回结果
+//            LOCAL_CACHE.put(cacheKey, cachedValue);
+//            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+//            return ResultUtils.success(cachedPage);
+//        }
+//        // 3. 查询数据库
+//        Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
+//                pictureService.getQueryWrapper(pictureQueryQo));
+//        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
+//        // 4. 更新缓存
+//        // 更新 Redis 缓存
+//        String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
+//        // 设置缓存的过期时间，5 - 10 分钟过期，防止缓存雪崩
+//        int cacheExpireTime = 300 + RandomUtil.randomInt(0, 300);
+//        opsForValue.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
+//        // 写入本地缓存
+//        LOCAL_CACHE.put(cacheKey, cacheValue);
+//        return ResultUtils.success(pictureVOPage);
+//    }
 
     @PostMapping("/upload/batch")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)

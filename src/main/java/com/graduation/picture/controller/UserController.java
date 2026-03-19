@@ -108,26 +108,26 @@ public class UserController {
     /**
      * 根据 id 获取用户（仅管理员）
      */
-    @GetMapping("/get")
-    @ApiOperation(value = "根据 id 获取用户（仅管理员）")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<User> getUserById(long id) {
-        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
-        User user = userService.getById(id);
-        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
-        return ResultUtils.success(user);
-    }
+//    @GetMapping("/get")
+//    @ApiOperation(value = "根据 id 获取用户（仅管理员）")
+//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+//    public BaseResponse<User> getUserById(long id) {
+//        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+//        User user = userService.getById(id);
+//        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
+//        return ResultUtils.success(user);
+//    }
 
     /**
      * 根据 id 获取包装类VO
      */
-    @GetMapping("/get/vo")
-    @ApiOperation(value = "获取用户VO")
-    public BaseResponse<UserVO> getUserVOById(long id) {
-        BaseResponse<User> response = getUserById(id);
-        User user = response.getData();
-        return ResultUtils.success(userService.getUserVO(user));
-    }
+//    @GetMapping("/get/vo")
+//    @ApiOperation(value = "获取用户VO")
+//    public BaseResponse<UserVO> getUserVOById(long id) {
+//        BaseResponse<User> response = getUserById(id);
+//        User user = response.getData();
+//        return ResultUtils.success(userService.getUserVO(user));
+//    }
 
     /**
      * 删除用户
